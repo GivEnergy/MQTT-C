@@ -137,7 +137,9 @@ enum MQTTErrors mqtt_init(struct mqtt_client *client,
     client->response_timeout = 30;
     client->number_of_timeouts = 0;
     client->number_of_keep_alives = 0;
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
     client->typical_response_time = -1.0f;
+#endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
     client->publish_response_callback = publish_response_callback;
     client->pid_lfsr = 0;
     client->send_offset = 0;
@@ -170,7 +172,9 @@ void mqtt_init_reconnect(struct mqtt_client *client,
     client->response_timeout = 30;
     client->number_of_timeouts = 0;
     client->number_of_keep_alives = 0;
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
     client->typical_response_time = -1.0f;
+#endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
     client->publish_response_callback = publish_response_callback;
     client->pid_lfsr = 0;
     client->send_offset = 0;
@@ -729,7 +733,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* initialize typical response time */
                 client->typical_response_time = (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -779,7 +783,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -797,7 +801,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -818,7 +822,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -839,7 +843,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -853,7 +857,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -873,7 +877,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
@@ -887,7 +891,7 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     break;
                 }
                 msg->state = MQTT_QUEUED_COMPLETE;
-#ifdef MQTTC_NO_TYPICAL_RESPONSE_TIME
+#ifndef MQTTC_NO_TYPICAL_RESPONSE_TIME
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
