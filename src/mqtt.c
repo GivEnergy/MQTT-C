@@ -141,6 +141,7 @@ enum MQTTErrors mqtt_init(struct mqtt_client *client,
     client->typical_response_time = -1.0f;
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
     client->publish_response_callback = publish_response_callback;
+    client->response_callback = NULL;
     client->pid_lfsr = 0;
     client->send_offset = 0;
 
@@ -176,6 +177,7 @@ void mqtt_init_reconnect(struct mqtt_client *client,
     client->typical_response_time = -1.0f;
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
     client->publish_response_callback = publish_response_callback;
+    client->response_callback = NULL;
     client->pid_lfsr = 0;
     client->send_offset = 0;
 
@@ -737,6 +739,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* initialize typical response time */
                 client->typical_response_time = (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 /* check that connection was successful */
                 if (response.decoded.connack.return_code != MQTT_CONNACK_ACCEPTED) {
                     if (response.decoded.connack.return_code == MQTT_CONNACK_REFUSED_IDENTIFIER_REJECTED) {
@@ -772,7 +776,10 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                     }
                 }
                 /* call publish callback */
-                client->publish_response_callback(&client->publish_response_callback_state, &response.decoded.publish);
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
+                if (client->publish_response_callback)
+                    client->publish_response_callback(&client->publish_response_callback_state, &response.decoded.publish);
                 break;
             case MQTT_CONTROL_PUBACK:
                 /* release associated PUBLISH */
@@ -787,6 +794,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 break;
             case MQTT_CONTROL_PUBREC:
                 /* check if this is a duplicate */
@@ -805,6 +814,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 /* stage PUBREL */
                 rv = __mqtt_pubrel(client, response.decoded.pubrec.packet_id);
                 if (rv != MQTT_OK) {
@@ -826,6 +837,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 /* stage PUBCOMP */
                 rv = __mqtt_pubcomp(client, response.decoded.pubrec.packet_id);
                 if (rv != MQTT_OK) {
@@ -847,6 +860,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 break;
             case MQTT_CONTROL_SUBACK:
                 /* release associated SUBSCRIBE */
@@ -861,6 +876,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 /* check that subscription was successful (not currently only one subscribe at a time) */
                 if (response.decoded.suback.return_codes[0] == MQTT_SUBACK_FAILURE) {
                     client->error = MQTT_ERROR_SUBSCRIBE_FAILED;
@@ -881,6 +898,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 break;
             case MQTT_CONTROL_PINGRESP:
                 /* release associated PINGREQ */
@@ -895,6 +914,8 @@ ssize_t __mqtt_recv(struct mqtt_client *client)
                 /* update response time */
                 client->typical_response_time = 0.875f * (client->typical_response_time) + 0.125f * (float) (MQTT_PAL_TIME() - msg->time_sent);
 #endif /* MQTTC_NO_TYPICAL_RESPONSE_TIME */
+                if (client->response_callback)
+                    client->response_callback(&client->response_callback_state, &response);
                 break;
             default:
                 client->error = MQTT_ERROR_MALFORMED_RESPONSE;

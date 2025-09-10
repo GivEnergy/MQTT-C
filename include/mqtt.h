@@ -1178,6 +1178,30 @@ struct mqtt_client {
     void* publish_response_callback_state;
 
     /**
+     * @brief The callback that is called when any response is received from the broker
+     *
+     * This function can be used to monitor responses to all MQTT packets, including
+     * connect, subscribe, ping, and publish responses. For example, it can be used to
+     * rate limit requests to avoid buffer overflows.
+     *
+     * @note A pointer to response_callback_state is always passed to the callback.
+     *       Use response_callback_state to keep track of any state information you
+     *       need.
+     *
+     * @note If publish_response_callback is also set, then it will called after the
+     *       reponse_callback. Usually, you only want to use one of these callbacks.
+     */
+    void (*response_callback)(void **state, struct mqtt_response *response);
+
+    /**
+     * @brief A pointer to any response_callback state information you need.
+     *
+     * @note A pointer to this pointer will always be response_callback upon
+     *       receiving a response from the broker.
+     */
+    void* response_callback_state;
+
+    /**
      * @brief A user-specified callback, triggered on each \ref mqtt_sync, allowing
      *        the user to perform state inspections (and custom socket error detection)
      *        on the client.
