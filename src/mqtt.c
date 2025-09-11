@@ -409,7 +409,7 @@ enum MQTTErrors mqtt_subscribe(struct mqtt_client *client,
             client->mq.curr, client->mq.curr_sz,
             packet_id,
             topic_name,
-            max_qos_level,
+            (unsigned int)max_qos_level,
             (const char*)NULL
         ), 
         1
